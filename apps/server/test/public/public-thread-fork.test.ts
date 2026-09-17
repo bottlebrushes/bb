@@ -3,6 +3,7 @@ import { join } from "node:path";
 import {
   createProjectSource,
   ensurePersonalProject,
+  environments,
   getEnvironment,
   getThread,
   listEvents,
@@ -300,6 +301,54 @@ describe("public thread fork route", () => {
       expect(response.status).toBe(400);
     });
   });
+  it("rejects fork without an explicit new environment when source environment is destroyed", async () => {
+    await withTestHarness(async (harness) => {
+      const { environment, sourceThread } = seedForkSource(harness);
+      harness.db
+        .update(environments)
+        .set({ status: "destroyed", path: null })
+        .where(eq(environments.id, environment.id))
+        .run();
+
+      const response = await postFork(harness, {
+        sourceThreadId: sourceThread.id,
+      });
+
+      expect(response.status).toBe(400);
+      expect(await readJson(response)).toMatchObject({
+        code: "invalid_request",
+        message: "Source thread must have a ready environment to fork",
+      });
+    });
+  });
+
+  it("permits fork when source environment is destroyed but a new environment is requested", async () => {
+    await withTestHarness(async (harness) => {
+      const { environment, sourceThread } = seedForkSource(harness);
+      harness.db
+        .update(environments)
+        .set({ status: "destroyed", path: null })
+        .where(eq(environments.id, environment.id))
+        .run();
+
+      const response = await postFork(harness, {
+        sourceThreadId: sourceThread.id,
+        environment: {
+          type: "host",
+          hostId: environment.hostId,
+          workspace: {
+            type: "managed-worktree",
+            baseBranch: { kind: "default" },
+          },
+        },
+      });
+      expect(response.status).toBe(201);
+      const fork = threadResponseSchema.parse(await readJson(response));
+      expect(fork.sourceThreadId).toBe(sourceThread.id);
+      expect(fork.originKind).toBe("fork");
+    });
+  });
+
 
   it("reuses a switched directory from a personal-project source", async () => {
     await withTestHarness(async (harness) => {

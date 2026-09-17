@@ -44,17 +44,24 @@ function requireForkCapableProvider(
 function requireSourceEnvironment(
   deps: Pick<ThreadForkDeps, "db">,
   sourceThread: Thread,
-): EnvironmentRow {
+  requestEnvironment?: ForkThreadRequest["environment"],
+): EnvironmentRow | null {
   const environment =
     sourceThread.environmentId === null
       ? null
       : getEnvironment(deps.db, sourceThread.environmentId);
-  if (!environment || environment.status !== "ready" || !environment.path) {
-    throw new ApiError(
-      400,
-      "invalid_request",
-      "Source thread must have a ready environment to fork",
-    );
+  const requiresReadySource =
+    requestEnvironment === undefined ||
+    (requestEnvironment.type === "reuse" &&
+      requestEnvironment.environmentId === environment?.id);
+  if (requiresReadySource) {
+    if (!environment || environment.status !== "ready" || !environment.path) {
+      throw new ApiError(
+        400,
+        "invalid_request",
+        "Source thread must have a ready environment to fork",
+      );
+    }
   }
   return environment;
 }
@@ -65,7 +72,18 @@ export async function createThreadForkFromRequest(
 ) {
   const sourceThread = requireForkSourceThread(deps, request.sourceThreadId);
   requireForkCapableProvider(deps, sourceThread);
-  const sourceEnvironment = requireSourceEnvironment(deps, sourceThread);
+  const sourceEnvironment = requireSourceEnvironment(
+    deps,
+    sourceThread,
+    request.environment,
+  );
+  if (request.environment === undefined && sourceEnvironment === null) {
+    throw new ApiError(
+      400,
+      "invalid_request",
+      "Source thread must have a ready environment to fork",
+    );
+  }
   const sourceExecution = getLastExecutionOptions(deps, sourceThread.id);
   const visibleInput = request.input ?? [];
   const agentContextSeed = request.agentContextSeed ?? [];
@@ -78,7 +96,7 @@ export async function createThreadForkFromRequest(
     {
       environment: request.environment ?? {
         type: "reuse",
-        environmentId: sourceEnvironment.id,
+        environmentId: sourceEnvironment!.id,
       },
       input,
       origin: request.origin,
@@ -113,7 +131,9 @@ export async function createThreadForkFromRequest(
       visibility: request.visibility,
     },
     {
-      forkSourceEnvironmentId: sourceEnvironment.id,
+      ...(sourceEnvironment
+        ? { forkSourceEnvironmentId: sourceEnvironment.id }
+        : {}),
       ...(isSeedOnlyIdleFork ? { providerInput: [] } : {}),
     },
   );
