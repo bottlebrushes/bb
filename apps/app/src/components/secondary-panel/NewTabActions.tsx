@@ -88,9 +88,11 @@ export function NewTabActions({
   startTerminalTrailing,
 }: NewTabActionsProps) {
   const terminalShortcut = useAppCommandShortcut("terminal.open");
+  const hasAiBrowser = (pluginActions ?? []).some(
+    (action) => action.pluginId === "ai-browser",
+  );
   const showOpenBrowser =
-    onOpenBrowser !== undefined && isDesktopBrowserAvailable();
-
+    !hasAiBrowser && onOpenBrowser !== undefined && isDesktopBrowserAvailable();
   const actions: NewTabAction[] = [];
   if (showOpenBrowser) {
     actions.push({
