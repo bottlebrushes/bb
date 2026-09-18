@@ -103,7 +103,6 @@ import {
 import { getBrowserUrlHost } from "@/lib/browser-url";
 import {
   getDesktopBrowserApi,
-  isDesktopBrowserAvailable,
 } from "@/lib/bb-desktop";
 import {
   useFixedPanelTabsState,
@@ -1278,16 +1277,14 @@ function RootComposeSurface({
   );
   const openBrowserTab = useCallback(
     (url?: string) => {
-      const browserUrl = url ?? "";
-      const tab = openTab({ kind: "browser", url: browserUrl });
-      if (browserUrl.length === 0 && tab?.kind === "browser") {
-        setBrowserAddressFocusRequest((current) => ({
-          requestId: (current?.requestId ?? 0) + 1,
-          tabId: tab.id,
-        }));
-      }
+      openPluginPanel({
+        pluginId: "ai-browser",
+        actionId: "ai-browser",
+        title: "Browser",
+        paramsJson: JSON.stringify({ initialUrl: url || "https://www.google.com" }),
+      });
     },
-    [openTab],
+    [openPluginPanel],
   );
   const openBrowserTabAndReveal = useCallback(
     (url?: string) => {
@@ -1543,7 +1540,7 @@ function RootComposeSurface({
     pluginDetails,
   ]);
   const [openLinksInAppBrowser] = useOpenLinksInAppBrowserPreference();
-  const desktopBrowserAvailable = isDesktopBrowserAvailable();
+  const desktopBrowserAvailable = true;
   const handleOpenPanelLink = useCallback<MarkdownPreviewLinkHandler>(
     ({ href }) => {
       if (
@@ -1978,9 +1975,7 @@ function RootComposeSurface({
       <PluginComposerHostProvider value={pluginComposerHost}>
         <UrlOpenRoutingProvider
           openInAppBrowser={
-            desktopBrowserAvailable && rootPanelThreadId !== null
-              ? openBrowserTabAndReveal
-              : null
+            rootPanelThreadId !== null ? openBrowserTabAndReveal : null
           }
         >
           <AppNavigationHostProvider capabilities={appNavigationCapabilities}>

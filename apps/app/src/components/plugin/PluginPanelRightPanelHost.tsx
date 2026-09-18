@@ -350,6 +350,7 @@ export function PluginPanelRightPanelHost({
     activeBrowserTab,
     browserTabs,
     closeTab,
+    openPluginPanel,
     openTab,
     orderedSecondaryFileTabs,
     reopenClosedTab,
@@ -601,12 +602,15 @@ export function PluginPanelRightPanelHost({
 
   const openBrowser = useCallback(
     (url = "") => {
-      if (!isDesktopBrowserAvailable()) return;
-      selectPersistedPanelTab();
-      openTab({ kind: "browser", url });
+      openPluginPanel({
+        pluginId: "ai-browser",
+        actionId: "ai-browser",
+        title: "Browser",
+        paramsJson: JSON.stringify({ initialUrl: url || "https://www.google.com" }),
+      });
       revealPanel();
     },
-    [openTab, revealPanel, selectPersistedPanelTab],
+    [openPluginPanel, revealPanel],
   );
   const browserTabIds = useMemo(
     () => new Set(browserTabs.map((tab) => tab.id)),
@@ -1221,7 +1225,7 @@ export function PluginPanelRightPanelHost({
 
   return (
     <UrlOpenRoutingProvider
-      openInAppBrowser={isDesktopBrowserAvailable() ? openBrowser : null}
+      openInAppBrowser={openBrowser}
     >
       <AppNavigationHostProvider capabilities={navigationCapabilities}>
         <PluginDetailRouteNavigationProvider
