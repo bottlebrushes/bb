@@ -23,6 +23,7 @@ import {
 import { buildSidebarEntitySectionId } from "@bb/client-core";
 import { makeThreadListEntry } from "@bb/test-helpers/domain-fixtures";
 import { makeProjectResponse } from "@/test/fixtures/projects";
+import type * as ThreadStateMutations from "@/hooks/mutations/thread-state-mutations";
 
 const mockUpdateEnvironment = vi.hoisted(() => ({
   mutate: vi.fn(),
@@ -30,6 +31,9 @@ const mockUpdateEnvironment = vi.hoisted(() => ({
 }));
 const mockArchiveEnvironmentThreads = vi.hoisted(() => ({
   mutateAsync: vi.fn(async () => ({ ok: true, archivedThreadIds: [] })),
+}));
+const mockArchiveThreadAndChildren = vi.hoisted(() => ({
+  mutateAsync: vi.fn(async () => ({ ok: true, archivedThreadIds: ["thr_plain_a"] })),
 }));
 const mockDraftThreadIds = vi.hoisted(() => ({
   current: new Set<string>(),
@@ -55,6 +59,17 @@ vi.mock("@/hooks/mutations/environment-mutations", () => ({
   }),
 }));
 
+vi.mock("@/hooks/mutations/thread-state-mutations", async (importOriginal) => {
+  const actual = (await importOriginal()) as typeof ThreadStateMutations;
+  return {
+    ...actual,
+    useArchiveThreadAndChildren: () => ({
+      isPending: false,
+      mutateAsync: mockArchiveThreadAndChildren.mutateAsync,
+      variables: undefined,
+    }),
+  };
+});
 vi.mock("@/hooks/useCreateThreadInEnvironment", () => ({
   useCreateThreadInEnvironment: () => mockCreateThreadInEnvironment,
 }));
@@ -623,8 +638,9 @@ describe("ProjectRow interactions", () => {
     ).toBeNull();
   });
 
-  it("archives and renames an environment group from any provider", async () => {
+  it("archives only the specific thread when multiple threads exist, and renames environment", async () => {
     mockArchiveEnvironmentThreads.mutateAsync.mockClear();
+    mockArchiveThreadAndChildren.mutateAsync.mockClear();
     renderProjectRow(vi.fn(), {
       status: "ready",
       threads: [
@@ -652,9 +668,10 @@ describe("ProjectRow interactions", () => {
       { button: 0 },
     );
     fireEvent.click(await screen.findByRole("menuitem", { name: "Archive" }));
-    expect(mockArchiveEnvironmentThreads.mutateAsync).toHaveBeenCalledWith({
-      id: "env_plain",
+    expect(mockArchiveThreadAndChildren.mutateAsync).toHaveBeenCalledWith({
+      id: "thr_plain_a",
     });
+    expect(mockArchiveEnvironmentThreads.mutateAsync).not.toHaveBeenCalled();
 
     fireEvent.pointerDown(
       screen.getByRole("button", { name: "Environment actions" }),
@@ -664,5 +681,42 @@ describe("ProjectRow interactions", () => {
     expect(
       await screen.findByRole("dialog", { name: "Rename environment" }),
     ).not.toBeNull();
+  });
+
+  it("archives the thread and keeps the environment active when a thread is archived from a multi-thread checkout", async () => {
+    mockArchiveEnvironmentThreads.mutateAsync.mockClear();
+    mockArchiveThreadAndChildren.mutateAsync.mockClear();
+    renderProjectRow(vi.fn(), {
+      status: "ready",
+      threads: [
+        makeThread({
+          id: "thr_multi_1",
+          environmentId: "env_multi",
+          environmentBranchName: "feature",
+          environmentProviderId: "personal-workspace",
+          environmentIsWorktree: true,
+          queuedWork: "none",
+        }),
+        makeThread({
+          id: "thr_multi_2",
+          environmentId: "env_multi",
+          environmentBranchName: "feature",
+          environmentProviderId: "personal-workspace",
+          environmentIsWorktree: true,
+          queuedWork: "none",
+        }),
+      ],
+    });
+
+    fireEvent.pointerDown(
+      screen.getByRole("button", { name: "Environment actions" }),
+      { button: 0 },
+    );
+    fireEvent.click(await screen.findByRole("menuitem", { name: "Archive" }));
+
+    expect(mockArchiveThreadAndChildren.mutateAsync).toHaveBeenCalledWith({
+      id: "thr_multi_1",
+    });
+    expect(mockArchiveEnvironmentThreads.mutateAsync).not.toHaveBeenCalled();
   });
 });
