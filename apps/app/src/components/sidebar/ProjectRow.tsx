@@ -46,6 +46,7 @@ import {
   useArchiveEnvironmentThreads,
   useUpdateEnvironment,
 } from "@/hooks/mutations/environment-mutations";
+import { useArchiveThreadAndChildren } from "@/hooks/mutations/thread-state-mutations";
 import { useDialogState } from "@/hooks/useDialogState";
 import { Button } from "@bb/shared-ui/button";
 import {
@@ -91,7 +92,7 @@ import {
 } from "@bb/client-core";
 import { cn } from "@bb/shared-ui/lib/utils";
 import { getMutationErrorMessage } from "@/lib/mutation-errors";
-import { getSettingsProjectRoutePath } from "@/lib/route-paths";
+import { getSettingsProjectRoutePath, getThreadRoutePath } from "@/lib/route-paths";
 import { getThreadDisplayTitle } from "@/lib/thread-title";
 import { appToast } from "@/components/ui/app-toast";
 import { useRouteNavigate } from "@/components/ui/app-route-anchor";
@@ -748,32 +749,71 @@ function useArchiveEnvironmentThreadGroupAction({
 }: UseArchiveEnvironmentThreadGroupActionArgs): UseArchiveEnvironmentThreadGroupActionResult {
   const navigate = useRouteNavigate();
   const archiveEnvironmentThreads = useArchiveEnvironmentThreads();
+  const archiveThreadAndChildren = useArchiveThreadAndChildren();
   const {
-    isPending: archiveThreadsIsPending,
-    mutateAsync: archiveThreads,
-    variables,
+    isPending: archiveEnvironmentThreadsIsPending,
+    mutateAsync: archiveEnvironmentThreadsMutate,
+    variables: archiveEnvironmentVariables,
   } = archiveEnvironmentThreads;
+  const {
+    isPending: archiveThreadIsPending,
+    mutateAsync: archiveThreadMutate,
+    variables: archiveThreadVariables,
+  } = archiveThreadAndChildren;
+
   const archiveThreadsPending =
-    archiveThreadsIsPending && variables?.id === environmentId;
+    (archiveEnvironmentThreadsIsPending &&
+      archiveEnvironmentVariables?.id === environmentId) ||
+    (archiveThreadIsPending &&
+      threads.some((t) => t.id === archiveThreadVariables?.id));
+
   const onArchiveThreads = useCallback(() => {
-    void archiveThreads({ id: environmentId })
-      .then((response) => {
-        appToast.success(
-          formatArchivedEnvironmentThreadsToastTitle({
-            archivedThreadIds: response.archivedThreadIds,
-            threads,
-          }),
-        );
-        if (
-          selectedThreadId &&
-          response.archivedThreadIds.includes(selectedThreadId)
-        ) {
-          navigate(`/projects/${projectId}`);
-        }
-      })
-      .catch(() => undefined);
+    if (threads.length > 1) {
+      const targetThread =
+        (selectedThreadId
+          ? threads.find((t) => t.id === selectedThreadId)
+          : undefined) ?? threads[0];
+      if (!targetThread) return;
+
+      void archiveThreadMutate({ id: targetThread.id })
+        .then(() => {
+          appToast.success(`Archived ${getThreadDisplayTitle(targetThread)}`);
+          if (selectedThreadId && selectedThreadId === targetThread.id) {
+            const nextThread = threads.find((t) => t.id !== targetThread.id);
+            if (nextThread) {
+              navigate(
+                getThreadRoutePath({
+                  projectId,
+                  threadId: nextThread.id,
+                }),
+              );
+            } else {
+              navigate(`/projects/${projectId}`);
+            }
+          }
+        })
+        .catch(() => undefined);
+    } else {
+      void archiveEnvironmentThreadsMutate({ id: environmentId })
+        .then((response) => {
+          appToast.success(
+            formatArchivedEnvironmentThreadsToastTitle({
+              archivedThreadIds: response.archivedThreadIds,
+              threads,
+            }),
+          );
+          if (
+            selectedThreadId &&
+            response.archivedThreadIds.includes(selectedThreadId)
+          ) {
+            navigate(`/projects/${projectId}`);
+          }
+        })
+        .catch(() => undefined);
+    }
   }, [
-    archiveThreads,
+    archiveEnvironmentThreadsMutate,
+    archiveThreadMutate,
     environmentId,
     navigate,
     projectId,
