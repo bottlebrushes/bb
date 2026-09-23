@@ -227,7 +227,7 @@ export const APP_COMMAND_GROUPS: readonly AppCommandGroup[] = [
     ],
   },
   {
-    label: "Browser",
+    label: "Local Browser",
     commands: [
       command(
         "browser.focusLocation",

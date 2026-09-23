@@ -88,17 +88,14 @@ export function NewTabActions({
   startTerminalTrailing,
 }: NewTabActionsProps) {
   const terminalShortcut = useAppCommandShortcut("terminal.open");
-  const hasAiBrowser = (pluginActions ?? []).some(
-    (action) => action.pluginId === "ai-browser",
-  );
   const showOpenBrowser =
-    !hasAiBrowser && onOpenBrowser !== undefined && isDesktopBrowserAvailable();
+    onOpenBrowser !== undefined && isDesktopBrowserAvailable();
   const actions: NewTabAction[] = [];
   if (showOpenBrowser) {
     actions.push({
       id: OPEN_BROWSER_ACTION_ID,
       icon: actionIcon("Globe"),
-      label: "Open browser",
+      label: "Local Browser",
       disabled: false,
       shortcut: null,
       trailing: null,

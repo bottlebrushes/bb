@@ -8,6 +8,7 @@ import type { PluginPanelActionEntry } from "@/components/plugin/PluginPanelActi
 import { setCompactSidebarDrawerShowing } from "@/components/ui/sidebar-mobile-drawer-visibility";
 import { NewTabActions } from "./NewTabActions";
 import { newTabActionOrderAtom } from "./newTabActionsAtoms";
+import { createNoopDesktopBrowserApi } from "@/test/bb-desktop-test-utils";
 
 vi.mock("@/components/commands/AppCommandProvider", () => ({
   useAppCommandShortcut: () => null,
@@ -56,6 +57,7 @@ afterEach(() => {
   cleanup();
   setCompactSidebarDrawerShowing(false);
   window.localStorage.clear();
+  delete (window as unknown as Record<string, unknown>).bbDesktop;
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -160,5 +162,46 @@ describe("NewTabActions", () => {
 
     expect(store.get(newTabActionOrderAtom)).toEqual([]);
     expect(actionLabels()).toEqual(["Start terminal", "Start side chat"]);
+  });
+
+  it("renders Local Browser when desktop browser is available and calls onOpenBrowser", () => {
+    (window as unknown as Record<string, unknown>).bbDesktop = {
+      browser: createNoopDesktopBrowserApi(),
+    };
+    const onOpenBrowser = vi.fn();
+    render(
+      <Provider store={createStore()}>
+        <NewTabActions
+          onOpenBrowser={onOpenBrowser}
+          onStartTerminal={() => undefined}
+        />
+      </Provider>,
+    );
+
+    expect(actionLabels()).toEqual(["Local Browser", "Start terminal"]);
+    fireEvent.click(screen.getByRole("button", { name: "Local Browser" }));
+    expect(onOpenBrowser).toHaveBeenCalledOnce();
+  });
+
+  it("renders both Local Browser and AI Browser when both are present", () => {
+    (window as unknown as Record<string, unknown>).bbDesktop = {
+      browser: createNoopDesktopBrowserApi(),
+    };
+    const aiBrowser = pluginAction("ai-browser", "AI Browser");
+    render(
+      <Provider store={createStore()}>
+        <NewTabActions
+          onOpenBrowser={() => undefined}
+          onStartTerminal={() => undefined}
+          pluginActions={[aiBrowser]}
+        />
+      </Provider>,
+    );
+
+    expect(actionLabels()).toEqual([
+      "Local Browser",
+      "Start terminal",
+      "AI Browser",
+    ]);
   });
 });

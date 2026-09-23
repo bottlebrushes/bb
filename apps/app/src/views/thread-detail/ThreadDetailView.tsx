@@ -214,6 +214,7 @@ import { Icon } from "@bb/shared-ui/icon";
 import {
   getBbDesktopInfo,
   getDesktopBrowserApi,
+  isDesktopBrowserAvailable,
 } from "@/lib/bb-desktop";
 import {
   openUrlByPreference,
@@ -802,20 +803,23 @@ function ThreadDetailViewInternal(props: ThreadRoutePathArgs) {
     );
   const openBrowserTab = useCallback(
     (url?: string) => {
-      openPluginPanel({
-        pluginId: "ai-browser",
-        actionId: "ai-browser",
-        title: "Browser",
-        paramsJson: JSON.stringify({ initialUrl: url || "https://www.google.com" }),
-      });
+      const browserUrl = url ?? "";
+      const tab = openTab({ kind: "browser", url: browserUrl });
+      if (browserUrl.length === 0 && tab?.kind === "browser") {
+        setBrowserAddressFocusRequest((current) => ({
+          requestId: (current?.requestId ?? 0) + 1,
+          tabId: tab.id,
+        }));
+      }
     },
-    [openPluginPanel],
+    [openTab],
   );
   const openNewTab = useCallback(() => {
     openTab({ kind: "new-tab" });
   }, [openTab]);
   const [openLinksInAppBrowser] = useOpenLinksInAppBrowserPreference();
-  const canOpenUrlsInAppBrowser = true;
+  const desktopBrowserAvailable = isDesktopBrowserAvailable();
+  const canOpenUrlsInAppBrowser = desktopBrowserAvailable;
   const browserTabIds = useMemo(
     () => new Set(browserTabs.map((tab) => tab.id)),
     [browserTabs],
