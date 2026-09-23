@@ -853,6 +853,9 @@ export function createDesktopBrowserViewManager(
         ...(pagePreloadPath === null ? {} : { preload: pagePreloadPath }),
       },
     });
+    if (typeof view.setBackgroundColor === "function") {
+      view.setBackgroundColor("#ffffff");
+    }
     const entry: BrowserViewEntry = {
       view,
       webContents: view.webContents,

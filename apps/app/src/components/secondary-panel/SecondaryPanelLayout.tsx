@@ -206,6 +206,17 @@ export function SecondaryPanelLayout({
     [cancelCompactDrawerContentSettleFrame],
   );
 
+  useEffect(() => {
+    if (!open || !renderAsDrawer) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setIsCompactDrawerContentSettled(true);
+      realizePanel();
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [open, realizePanel, renderAsDrawer, resetKey]);
+
   const handleDrawerContentAnimationEnd = useCallback(
     (animationEndedOpen: boolean) => {
       if (!animationEndedOpen) {
