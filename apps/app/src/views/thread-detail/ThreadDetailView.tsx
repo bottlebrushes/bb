@@ -2762,7 +2762,7 @@ function ThreadDetailViewInternal(props: ThreadRoutePathArgs) {
             tab.title ?? (tab.url.length > 0 ? getBrowserUrlHost(tab.url) : "");
           return {
             ...shared,
-            label: browserLabel.length > 0 ? browserLabel : "Browser",
+            label: browserLabel.length > 0 ? browserLabel : "Local Browser",
             leadingVisual: (
               <Icon
                 name="Globe"
