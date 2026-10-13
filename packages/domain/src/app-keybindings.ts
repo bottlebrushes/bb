@@ -39,6 +39,7 @@ export const APP_COMMAND_IDS = [
   "palette.open",
   "thread.new",
   "thread.search",
+  "thread.find",
   "thread.rename",
   "thread.archive",
   "thread.previous",

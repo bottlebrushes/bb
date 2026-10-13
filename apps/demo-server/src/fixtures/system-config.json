@@ -49,6 +49,22 @@
       }
     },
     {
+      "command": "thread.find",
+      "desktopOnly": false,
+      "shortcut": {
+        "key": "f",
+        "mod": true,
+        "meta": false,
+        "control": false,
+        "alt": false,
+        "shift": false
+      },
+      "when": {
+        "all": ["mainSurface"],
+        "none": ["modalOpen", "terminalFocus", "browserFocus"]
+      }
+    },
+    {
       "command": "app.back",
       "desktopOnly": false,
       "shortcut": {
@@ -1632,6 +1648,22 @@
       "when": {
         "all": ["mainSurface"],
         "none": ["modalOpen"]
+      }
+    },
+    {
+      "command": "thread.find",
+      "desktopOnly": false,
+      "shortcut": {
+        "key": "f",
+        "mod": true,
+        "meta": false,
+        "control": false,
+        "alt": false,
+        "shift": false
+      },
+      "when": {
+        "all": ["mainSurface"],
+        "none": ["modalOpen", "terminalFocus", "browserFocus"]
       }
     },
     {

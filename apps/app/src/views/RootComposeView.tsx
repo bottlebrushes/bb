@@ -103,6 +103,7 @@ import {
 import { getBrowserUrlHost } from "@/lib/browser-url";
 import {
   getDesktopBrowserApi,
+  isDesktopBrowserAvailable,
 } from "@/lib/bb-desktop";
 import {
   useFixedPanelTabsState,
@@ -1277,14 +1278,16 @@ function RootComposeSurface({
   );
   const openBrowserTab = useCallback(
     (url?: string) => {
-      openPluginPanel({
-        pluginId: "ai-browser",
-        actionId: "ai-browser",
-        title: "Browser",
-        paramsJson: JSON.stringify({ initialUrl: url || "https://www.google.com" }),
-      });
+      const browserUrl = url ?? "";
+      const tab = openTab({ kind: "browser", url: browserUrl });
+      if (browserUrl.length === 0 && tab?.kind === "browser") {
+        setBrowserAddressFocusRequest((current) => ({
+          requestId: (current?.requestId ?? 0) + 1,
+          tabId: tab.id,
+        }));
+      }
     },
-    [openPluginPanel],
+    [openTab],
   );
   const openBrowserTabAndReveal = useCallback(
     (url?: string) => {
@@ -1540,7 +1543,7 @@ function RootComposeSurface({
     pluginDetails,
   ]);
   const [openLinksInAppBrowser] = useOpenLinksInAppBrowserPreference();
-  const desktopBrowserAvailable = true;
+  const desktopBrowserAvailable = isDesktopBrowserAvailable();
   const handleOpenPanelLink = useCallback<MarkdownPreviewLinkHandler>(
     ({ href }) => {
       if (
@@ -1653,7 +1656,7 @@ function RootComposeSurface({
               (tab.url.length > 0 ? getBrowserUrlHost(tab.url) : "");
             return {
               ...shared,
-              label: browserLabel.length > 0 ? browserLabel : "Browser",
+              label: browserLabel.length > 0 ? browserLabel : "Local Browser",
               leadingVisual: (
                 <Icon
                   name="Globe"
@@ -1975,7 +1978,9 @@ function RootComposeSurface({
       <PluginComposerHostProvider value={pluginComposerHost}>
         <UrlOpenRoutingProvider
           openInAppBrowser={
-            rootPanelThreadId !== null ? openBrowserTabAndReveal : null
+            desktopBrowserAvailable && rootPanelThreadId !== null
+              ? openBrowserTabAndReveal
+              : null
           }
         >
           <AppNavigationHostProvider capabilities={appNavigationCapabilities}>

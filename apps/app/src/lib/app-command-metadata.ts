@@ -47,6 +47,11 @@ export const APP_COMMAND_GROUPS: readonly AppCommandGroup[] = [
         "Search threads",
         "Search threads in the quick palette.",
       ),
+      command(
+        "thread.find",
+        "Find in chat",
+        "Find text in the focused chat transcript.",
+      ),
       command("thread.rename", "Rename thread", "Rename the focused thread."),
       command(
         "thread.archive",
@@ -227,7 +232,7 @@ export const APP_COMMAND_GROUPS: readonly AppCommandGroup[] = [
     ],
   },
   {
-    label: "Browser",
+    label: "Local Browser",
     commands: [
       command(
         "browser.focusLocation",

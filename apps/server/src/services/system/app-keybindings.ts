@@ -144,6 +144,15 @@ export const DEFAULT_APP_KEYBINDINGS: AppDefaultKeybindings = [
     },
   ),
   binding("thread.search", "k", { mod: true }, mainWithoutModal),
+  binding(
+    "thread.find",
+    "f",
+    { mod: true },
+    {
+      all: ["mainSurface"],
+      none: ["modalOpen", "terminalFocus", "browserFocus"],
+    },
+  ),
   unassignedBinding("thread.rename", mainWithoutModal),
   unassignedBinding("thread.archive", mainWithoutModal),
   binding("app.back", "Escape", {}, mainWithoutModal),

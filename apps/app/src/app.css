@@ -807,6 +807,15 @@
   }
 }
 
+::highlight(bb-thread-find-match) {
+  background-color: color-mix(in oklab, var(--attention) 40%, transparent);
+}
+
+::highlight(bb-thread-find-active) {
+  background-color: color-mix(in oklab, var(--warning) 75%, transparent);
+  color: var(--ink);
+}
+
 /* Browse hero (Plugins → Browse plugins): the archetype chips orbiting the mini bb
  * window drift slowly so the hero reads as alive without competing with the
  * composer sitting in the middle of it. Duration and delay are per-chip custom

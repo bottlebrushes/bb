@@ -497,7 +497,7 @@ function NewTabPanelStory({
       </QueryClientProvider>
     ) : outcome.kind === "browser" ? (
       <div className="flex min-h-full flex-col justify-center px-4 text-sm">
-        <p className="font-medium text-foreground">Opened browser tab</p>
+        <p className="font-medium text-foreground">Opened local browser tab</p>
         <p className="pt-1 text-xs text-muted-foreground">
           A new in-panel web browser tab opens here (see the
           &ldquo;right-panel/Browser tab&rdquo; story).
@@ -530,7 +530,7 @@ function NewTabPanelStory({
       outcome === null
         ? "New tab"
         : outcome.kind === "browser"
-          ? "Browser"
+          ? "Local Browser"
           : outcome.kind === "terminal"
             ? "Terminal"
             : getFileNameFromPath({ path: outcome.selection.path }),

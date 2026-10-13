@@ -725,6 +725,11 @@ export function BrowserTabContent({
       }
       setCurrentUrl(url);
       setIsEditing(false);
+      onUpdateRef.current({
+        tabId,
+        url,
+        title: null,
+      });
       desktopBrowser?.navigate({ tabId, url });
     },
     [desktopBrowser, tabId],

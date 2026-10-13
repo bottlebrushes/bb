@@ -1261,7 +1261,7 @@ describe("PluginPanelRightPanelHost", () => {
 
     expect(await screen.findByTestId("plugin-page-browser")).toBeTruthy();
     expect(secondaryPanelState.tabKinds).toContain("browser");
-    fireEvent.click(screen.getByRole("button", { name: "Close Browser" }));
+    fireEvent.click(screen.getByRole("button", { name: "Close Local Browser" }));
     expect(
       await screen.findByRole("button", { name: "Show right panel" }),
     ).toBeTruthy();

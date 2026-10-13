@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type {
   ActiveThinking,
   ThreadOriginKind,
@@ -18,6 +18,7 @@ import { useAutoLoadOlderRows } from "./useAutoLoadOlderRows.js";
 import { TimelineStatusIndicator } from "./TimelineStatusIndicator.js";
 import type { TimelineTitleActionResolver } from "./TimelineTitleView.js";
 import { TimelineReasoningExpansionProvider } from "./TimelineReasoningExpansion.js";
+import { ThreadFind } from "./ThreadFind.js";
 import { TimelineWorkingIndicator } from "./TimelineWorkingIndicator.js";
 import type {
   ThreadTimelineForkMessageHandler,
@@ -45,6 +46,7 @@ export interface ThreadTimelineSurfaceProps {
   hasOlderTimelineRows?: boolean;
   hostConnectionNotice?: HostConnectionNotice | null;
   isLoadingOlderTimelineRows?: boolean;
+  isPrimaryFindTarget?: boolean;
   isThreadTimelinePending: boolean;
   timelineError: boolean;
   loadingContent?: ReactNode;
@@ -147,6 +149,7 @@ export function ThreadTimelineSurface({
   hasOlderTimelineRows = false,
   hostConnectionNotice,
   isLoadingOlderTimelineRows = false,
+  isPrimaryFindTarget = false,
   isThreadTimelinePending,
   timelineError,
   loadingContent,
@@ -199,6 +202,7 @@ export function ThreadTimelineSurface({
     stoppingAnchorAt,
     threadId,
   });
+  const timelineRef = useRef<HTMLDivElement>(null);
   const showLoadOlderRows =
     hasOlderTimelineRows &&
     onLoadOlderRows !== undefined &&
@@ -207,7 +211,12 @@ export function ThreadTimelineSurface({
 
   return (
     <TimelineReasoningExpansionProvider key={threadId}>
-      <ConversationTimeline className="flex-1">
+      <ConversationTimeline ref={timelineRef} className="flex-1">
+        <ThreadFind
+          key={threadId}
+          isPrimary={isPrimaryFindTarget}
+          rootRef={timelineRef}
+        />
         {leadingContent}
         {showLoadOlderRows ? (
           <LoadOlderMessages
