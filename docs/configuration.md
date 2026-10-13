@@ -367,6 +367,7 @@ delayed shortcut badges without disabling any shortcuts.
 | Palette   | Quick palette                             | `Mod+Shift+P`                     | All clients              |
 | Threads   | New thread                                | `Mod+N` / `Mod+Shift+O`           | Desktop / web            |
 | Threads   | Search threads                            | `Mod+K`                           | All clients              |
+| Threads   | Find in chat                              | `Mod+F`                           | Thread view              |
 | Threads   | Rename focused thread                     | Unassigned                        | Thread view              |
 | Threads   | Archive focused thread                    | Unassigned                        | Thread view              |
 | Threads   | Previous / next thread                    | Surface defaults above            | Desktop / web            |
@@ -397,6 +398,14 @@ or an open picker; unrelated editable controls retain their Option-composed
 character input. A configured app shortcut takes precedence in editable
 controls; when no matching command handles a chord, the control retains its
 native behavior.
+
+Find in chat searches the rendered transcript of the chat that holds keyboard
+focus, or the chat last clicked when nothing is focused, falling back to the
+focused pane's main chat. Matches update as messages stream in. Enter and
+Shift+Enter move between matches; Escape closes the bar. Collapsed rows and
+older messages that have not loaded are not searched. The embedded browser
+keeps `Mod+F` for find in page while it has focus, and terminals keep the
+chord.
 
 The desktop application menu uses the same resolved bindings for New Thread,
 New Window, New Tab, Close, and Settings. There is no separate menu shortcut

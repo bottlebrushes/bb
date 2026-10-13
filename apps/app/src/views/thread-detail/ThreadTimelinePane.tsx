@@ -38,7 +38,11 @@ export function ThreadTimelinePane({
           onNavigateToRow={setTimelineNavigationTargetRowId}
         />
       }
-      surface={{ ...surface, timelineNavigationTargetRowId }}
+      surface={{
+        ...surface,
+        isPrimaryFindTarget: true,
+        timelineNavigationTargetRowId,
+      }}
     />
   );
 }
