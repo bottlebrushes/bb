@@ -41,6 +41,7 @@ import InformationCircleIcon from "@hugeicons/core-free-icons/InformationCircleI
 import Loading03Icon from "@hugeicons/core-free-icons/Loading03Icon";
 import MessageQuestionIcon from "@hugeicons/core-free-icons/MessageQuestionIcon";
 import MoreHorizontalIcon from "@hugeicons/core-free-icons/MoreHorizontalIcon";
+import PowerIcon from "@hugeicons/core-free-icons/PowerIcon";
 import Search01Icon from "@hugeicons/core-free-icons/Search01Icon";
 import Settings01Icon from "@hugeicons/core-free-icons/Settings01Icon";
 import SidebarLeftIcon from "@hugeicons/core-free-icons/SidebarLeftIcon";
@@ -209,6 +210,7 @@ const CORE_ICON_MAP = {
   UserRoundPlus: UserAdd01Icon,
   Workflow: WorkflowCircle03Icon,
   X: Cancel01Icon,
+  Power: PowerIcon,
   Zap: ZapIcon,
 } as const satisfies Record<string, IconSvgElement>;
 

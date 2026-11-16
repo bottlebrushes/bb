@@ -30,7 +30,7 @@ export function TimelineWorkingIndicator({
         label={
           <>
             <Icon
-              name="Zap"
+              name="Power"
               className="size-3.5 shrink-0 animate-shine-icon text-yellow-600 dark:text-yellow-400"
               aria-hidden
             />

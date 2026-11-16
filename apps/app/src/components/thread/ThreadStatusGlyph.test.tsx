@@ -18,7 +18,7 @@ describe("ThreadStatusGlyph", () => {
     ["unread-error", "Unread thread failed", "CircleX"],
     ["queued-failed", "Queued message failed to send", "CircleX"],
     ["waiting-for-input", "Thread needs user input", "CircleQuestion"],
-    ["waiting-for-host", "Waiting for machine to reconnect", "Zap"],
+    ["waiting-for-host", "Waiting for machine to reconnect", "Power"],
     ["queued-waiting", "Thread has a message waiting to send", "Clock"],
     ["working-draft", "Thread working with unsubmitted draft", "Edit"],
     ["workflow", "Workflow running", "Workflow"],

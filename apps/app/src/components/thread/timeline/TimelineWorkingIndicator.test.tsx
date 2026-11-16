@@ -13,7 +13,7 @@ describe("TimelineWorkingIndicator", () => {
     const { container } = render(<TimelineWorkingIndicator waitingForHost />);
 
     expect(screen.getByText("Waiting for machine to resume…")).toBeTruthy();
-    const icon = container.querySelector('[data-icon="Zap"]');
+    const icon = container.querySelector('[data-icon="Power"]');
     expect(icon).not.toBeNull();
     expect(Array.from(icon?.classList ?? [])).toContain("animate-shine-icon");
     expect(Array.from(icon?.classList ?? [])).toContain("text-yellow-600");

@@ -189,9 +189,9 @@ describe("queuedMessageWaitIcon", () => {
         threadRuntimeDisplayStatus: "waiting-for-host",
         waitingOn: { kind: "turn-starting" },
       }),
-    ).toBe("Zap");
+    ).toBe("Power");
     expect(icon({ kind: "provisioning" })).toBe("Folder");
-    expect(icon({ kind: "host-offline", hostName: "M4" })).toBe("Zap");
+    expect(icon({ kind: "host-offline", hostName: "M4" })).toBe("Power");
     expect(icon({ kind: "plugin", pluginId: "p", reason: "r" })).toBeNull();
     expect(icon({ kind: "thread-busy" })).toBeNull();
     expect(icon(null)).toBeNull();

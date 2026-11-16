@@ -150,7 +150,7 @@ export function ThreadStatusGlyph({
     case "waiting-for-host":
       return (
         <Icon
-          name="Zap"
+          name="Power"
           className={cn(
             "animate-shine-icon text-yellow-600 dark:text-yellow-400",
             iconSizeClass,

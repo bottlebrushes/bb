@@ -720,7 +720,7 @@ function QueuedMessageWaitLine({
           name={icon}
           className={cn(
             "size-3 shrink-0",
-            icon === "Zap" &&
+            icon === "Power" &&
               "animate-shine-icon text-yellow-600 dark:text-yellow-400",
           )}
           aria-hidden

@@ -85,14 +85,14 @@ export function queuedMessageWaitIcon(args: {
       return "TimeSchedule";
     case "turn-starting":
       return args.threadRuntimeDisplayStatus === "waiting-for-host"
-        ? "Zap"
+        ? "Power"
         : "TimeSchedule";
     case "time":
       return "TimeSchedule";
     case "provisioning":
       return "Folder";
     case "host-offline":
-      return "Zap";
+      return "Power";
     case "interaction":
       return "CircleQuestion";
     case "app-update":

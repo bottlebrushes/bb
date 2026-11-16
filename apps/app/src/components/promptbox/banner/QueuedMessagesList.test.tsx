@@ -2261,7 +2261,7 @@ describe("queued row affordances", () => {
     ]);
     expandQueue();
     expect(getByText("Waiting for machine to reconnect")).toBeDefined();
-    expect(container.querySelector('[data-icon="Zap"]')).not.toBeNull();
+    expect(container.querySelector('[data-icon="Power"]')).not.toBeNull();
     expect(queryByLabelText("Send queued message 1 now")).toBeNull();
   });
 
