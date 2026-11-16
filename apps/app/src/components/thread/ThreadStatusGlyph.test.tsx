@@ -18,6 +18,7 @@ describe("ThreadStatusGlyph", () => {
     ["unread-error", "Unread thread failed", "CircleX"],
     ["queued-failed", "Queued message failed to send", "CircleX"],
     ["waiting-for-input", "Thread needs user input", "CircleQuestion"],
+    ["waiting-for-host", "Waiting for machine to reconnect", "Zap"],
     ["queued-waiting", "Thread has a message waiting to send", "Clock"],
     ["working-draft", "Thread working with unsubmitted draft", "Edit"],
     ["workflow", "Workflow running", "Workflow"],
@@ -49,6 +50,10 @@ describe("ThreadStatusGlyph", () => {
     expect(Array.from(runtime.classList)).toContain(
       "motion-reduce:animate-none",
     );
+    rerender(<ThreadStatusGlyph indicator="waiting-for-host" />);
+    const waiting = screen.getByLabelText("Waiting for machine to reconnect");
+    expect(Array.from(waiting.classList)).toContain("animate-shine-icon");
+    expect(Array.from(waiting.classList)).toContain("text-yellow-600");
   });
 
   it("draws unread success as a dot and nothing for none", () => {

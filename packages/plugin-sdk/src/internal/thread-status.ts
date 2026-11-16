@@ -8,7 +8,6 @@ import type {
 } from "../app-contract.js";
 
 type IndicatorLabelKind = Exclude<PluginSidebarThreadIndicator, "none">;
-
 const INDICATOR_LABELS: Record<IndicatorLabelKind, string> = {
   "unread-error": "Unread thread failed",
   "waiting-for-input": "Thread needs user input",
@@ -18,6 +17,7 @@ const INDICATOR_LABELS: Record<IndicatorLabelKind, string> = {
   "background-command": "Background command running",
   "plan-mode": "Plan mode active",
   runtime: "Thread working",
+  "waiting-for-host": "Waiting for machine to reconnect",
   "queued-failed": "Queued message failed to send",
   "queued-waiting": "Thread has a message waiting to send",
   draft: "Thread has unsubmitted draft",
@@ -47,14 +47,21 @@ const DONE_THREAD_STATUSES: Record<PluginSidebarThread["status"], boolean> = {
   pending: false,
 };
 
-const INDICATORS_OVER_ROW_STATUS: ReadonlySet<PluginSidebarThreadIndicator> =
-  new Set(["runtime", "unread-error", "waiting-for-input"]);
+const INDICATORS_OVER_ROW_STATUS: Partial<
+  Record<PluginSidebarThreadIndicator, true>
+> = {
+  runtime: true,
+  "waiting-for-host": true,
+  "unread-error": true,
+  "waiting-for-input": true,
+};
 
 interface IndicatorFlags {
   pending: boolean;
   unreadError: boolean;
   unreadSuccess: boolean;
   runtime: boolean;
+  waitingForHost: boolean;
   workflow: boolean;
   backgroundAgent: boolean;
   backgroundCommand: boolean;
@@ -71,7 +78,7 @@ export function visibleThreadRowStatus(
   indicator: PluginSidebarThreadIndicator,
   rowStatus: PluginSidebarThreadRowStatus | null,
 ): PluginSidebarThreadRowStatus | null {
-  return INDICATORS_OVER_ROW_STATUS.has(indicator) ? null : rowStatus;
+  return indicator in INDICATORS_OVER_ROW_STATUS ? null : rowStatus;
 }
 
 function isUnreadDoneThread(thread: PluginThreadStatusThread): boolean {
@@ -90,6 +97,7 @@ function addThreadFlags(
   flags.pending ||= thread.hasPendingInteraction;
   flags.unreadError ||= unreadDone && thread.status === "error";
   flags.unreadSuccess ||= unreadDone && thread.status !== "error";
+  flags.waitingForHost ||= thread.runtimeStatus === "waiting-for-host";
   flags.runtime ||= RUNNING_RUNTIME_STATUSES[thread.runtimeStatus];
   flags.workflow ||= thread.activity.workflows > 0;
   flags.backgroundAgent ||= thread.activity.backgroundAgents > 0;
@@ -105,6 +113,7 @@ function resolveIndicator(
 ): PluginSidebarThreadIndicator {
   if (flags.unreadError) return "unread-error";
   if (flags.pending) return "waiting-for-input";
+  if (flags.waitingForHost) return "waiting-for-host";
   if (hasUnsubmittedDraft && isWorking) return "working-draft";
   if (flags.planMode) return "plan-mode";
   if (flags.runtime) return "runtime";
@@ -129,6 +138,7 @@ export function experimental_resolveThreadStatus({
     unreadError: false,
     unreadSuccess: false,
     runtime: false,
+    waitingForHost: false,
     workflow: false,
     backgroundAgent: false,
     backgroundCommand: false,

@@ -147,6 +147,17 @@ export function ThreadStatusGlyph({
           aria-label={threadIndicatorLabel(indicator) ?? undefined}
         />
       );
+    case "waiting-for-host":
+      return (
+        <Icon
+          name="Zap"
+          className={cn(
+            "animate-shine-icon text-yellow-600 dark:text-yellow-400",
+            iconSizeClass,
+          )}
+          aria-label={threadIndicatorLabel(indicator) ?? undefined}
+        />
+      );
     case "working-draft":
       return <ThreadDraftIndicator isWorking size={size} />;
     case "workflow":

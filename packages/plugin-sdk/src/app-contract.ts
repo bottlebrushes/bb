@@ -1381,7 +1381,8 @@ export interface ExperimentalSidebarFooter {
  * cannot. A thread holding a draft reports whatever it would report without
  * one. "queued-failed" and "queued-waiting" are reported, with the same
  * precedence bb's list uses (a failed send outranks the unread dot; a waiting
- * message ranks just below it).
+ * message ranks just below it). "waiting-for-host" means the thread's machine
+ * is disconnected while its work is retained.
  */
 export type PluginSidebarThreadIndicator =
   | "unread-error"
@@ -1392,6 +1393,7 @@ export type PluginSidebarThreadIndicator =
   | "background-command"
   | "plan-mode"
   | "runtime"
+  | "waiting-for-host"
   | "queued-failed"
   | "draft"
   | "unread-success"

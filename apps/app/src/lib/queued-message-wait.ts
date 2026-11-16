@@ -2,6 +2,7 @@ import {
   RESTART_RESUME_RETRY_REASON,
   type QueuedMessagePayload,
   type QueuedMessageWaitingOn,
+  type ThreadRuntimeDisplayStatus,
   type ThreadStatus,
 } from "@bb/domain";
 import type { IconName } from "@bb/shared-ui/icon";
@@ -11,6 +12,8 @@ const SUPERSEDED_WAIT_LINE = "Not sent · a newer message was sent after it";
 const MINUTE_MS = 60 * 1000;
 const HOUR_MS = 60 * MINUTE_MS;
 const DAY_MS = 24 * HOUR_MS;
+
+
 
 export function formatQueuedMessageCountdown(
   remainingMs: number,
@@ -69,6 +72,7 @@ export function queuedMessageWaitIcon(args: {
   failureReason: string | null;
   payload: QueuedMessagePayload;
   waitingOn: QueuedMessageWaitingOn | null;
+  threadRuntimeDisplayStatus?: ThreadRuntimeDisplayStatus;
 }): IconName | null {
   if (args.failureReason !== null) return "AlertCircle";
   if (args.waitingOn?.kind === "superseded") return "AlertCircle";
@@ -78,14 +82,17 @@ export function queuedMessageWaitIcon(args: {
     case "thread-busy":
       return null;
     case "stopping":
-    case "turn-starting":
       return "TimeSchedule";
+    case "turn-starting":
+      return args.threadRuntimeDisplayStatus === "waiting-for-host"
+        ? "Zap"
+        : "TimeSchedule";
     case "time":
       return "TimeSchedule";
     case "provisioning":
       return "Folder";
     case "host-offline":
-      return "CloudOff";
+      return "Zap";
     case "interaction":
       return "CircleQuestion";
     case "app-update":
@@ -101,6 +108,7 @@ export interface DescribeQueuedMessageWaitArgs {
   payload: QueuedMessagePayload;
   pluginDisplayName: string | null;
   sendAt: number | null;
+  threadRuntimeDisplayStatus?: ThreadRuntimeDisplayStatus;
   threadStatus: ThreadStatus;
   waitingOn: QueuedMessageWaitingOn | null;
 }
@@ -149,9 +157,11 @@ export function describeQueuedMessageWait(
     case "thread-busy":
       return null;
     case "turn-starting":
-      return args.threadStatus === "error"
-        ? "Turn didn't start · sends on the next turn"
-        : "Waiting for turn to start";
+      return args.threadRuntimeDisplayStatus === "waiting-for-host"
+        ? "Waiting for machine to resume"
+        : args.threadStatus === "error"
+          ? "Turn didn't start · sends on the next turn"
+          : "Waiting for turn to start";
     case "stopping":
       return "Sending when the thread stops";
     case "time":
@@ -161,7 +171,7 @@ export function describeQueuedMessageWait(
     case "provisioning":
       return "Waiting for workspace";
     case "host-offline":
-      return `Waiting for ${args.waitingOn.hostName} to be ready`;
+      return "Waiting for machine to reconnect";
     case "interaction":
       return "Waiting for your reply";
     case "app-update":

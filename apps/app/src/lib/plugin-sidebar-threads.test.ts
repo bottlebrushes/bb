@@ -148,6 +148,8 @@ describe("toPluginSidebarThread", () => {
     );
     expect(mapped.status).toBe("active");
     expect(mapped.runtimeStatus).toBe("waiting-for-host");
+    expect(mapped.indicator).toBe("waiting-for-host");
+    expect(mapped.indicatorLabel).toBe("Waiting for machine to reconnect");
     expect(mapped.lifecycleOwnerThreadId).toBe("thr_owner");
     expect(mapped.sourceThreadId).toBe("thr_source");
   });

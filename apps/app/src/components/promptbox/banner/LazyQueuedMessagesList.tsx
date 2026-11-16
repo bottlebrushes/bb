@@ -1,5 +1,9 @@
 import { useEffect, type ReactNode } from "react";
-import type { ThreadQueuedMessage, ThreadStatus } from "@bb/domain";
+import type {
+  ThreadQueuedMessage,
+  ThreadRuntimeDisplayStatus,
+  ThreadStatus,
+} from "@bb/domain";
 import { cn } from "@bb/shared-ui/lib/utils";
 import { formatQueuedMessagePreview } from "@bb/client-core";
 import { queuedMessageFallbackTitle } from "@/lib/queued-message-wait";
@@ -61,6 +65,7 @@ export interface QueuedMessagesListProps {
   onDelete: (id: string) => void;
   expanded: boolean;
   onExpandedChange: (expanded: boolean) => void;
+  threadRuntimeDisplayStatus?: ThreadRuntimeDisplayStatus;
   threadStatus: ThreadStatus;
 }
 

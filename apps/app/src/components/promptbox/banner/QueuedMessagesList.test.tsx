@@ -2252,15 +2252,16 @@ describe("queued row affordances", () => {
     expect(onSend).toHaveBeenCalledWith("q_provisioning");
   });
 
-  it("names the absent machine on a host-offline row and hides Send now", () => {
-    const { getByText, queryByLabelText } = renderQueuedMessages([
+  it("shows the machine wait on a host-offline row and hides Send now", () => {
+    const { container, getByText, queryByLabelText } = renderQueuedMessages([
       {
         ...makeQueuedMessage("q_offline", "Capture the Safari trace"),
         waitingOn: { kind: "host-offline", hostName: "M4" },
       },
     ]);
     expandQueue();
-    expect(getByText("Waiting for M4 to be ready")).toBeDefined();
+    expect(getByText("Waiting for machine to reconnect")).toBeDefined();
+    expect(container.querySelector('[data-icon="Zap"]')).not.toBeNull();
     expect(queryByLabelText("Send queued message 1 now")).toBeNull();
   });
 

@@ -2206,6 +2206,7 @@ export function ThreadDetailPromptArea({
             onDelete={handleDeleteQueuedMessage}
             expanded={queueExpanded}
             onExpandedChange={setQueueExpanded}
+            threadRuntimeDisplayStatus={runtimeDisplayStatus}
             threadStatus={thread.status}
           />
         )}

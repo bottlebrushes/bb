@@ -261,6 +261,9 @@ export function ThreadTimelineSurface({
                 reasoningId={activeThinking?.id}
                 isThinking={showActiveThinking}
                 label={ongoingIndicatorLabel}
+                waitingForHost={
+                  threadRuntimeDisplayStatus === "waiting-for-host"
+                }
               />
             </HeightTransition>
           </>

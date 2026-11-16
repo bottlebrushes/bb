@@ -75,6 +75,7 @@ import type {
   PromptTextMention,
   QueuedMessageSystemNotice,
   ThreadQueuedMessage,
+  ThreadRuntimeDisplayStatus,
   ThreadStatus,
 } from "@bb/domain";
 import { Button } from "@bb/shared-ui/button";
@@ -149,6 +150,7 @@ interface QueuedMessageRowProps {
   onDelete: (id: string) => void;
   compact: boolean;
   isGroupBoundary: boolean;
+  threadRuntimeDisplayStatus?: ThreadRuntimeDisplayStatus;
   threadStatus: ThreadStatus;
 }
 
@@ -674,10 +676,12 @@ function QueuedMessagePreview({
 function QueuedMessageWaitLine({
   pluginDisplayName,
   queuedMessage,
+  threadRuntimeDisplayStatus,
   threadStatus,
 }: {
   pluginDisplayName: string;
   queuedMessage: ThreadQueuedMessage;
+  threadRuntimeDisplayStatus?: ThreadRuntimeDisplayStatus;
   threadStatus: ThreadStatus;
 }) {
   const now = useSecondTick();
@@ -687,12 +691,16 @@ function QueuedMessageWaitLine({
     payload: queuedMessage.payload,
     pluginDisplayName,
     sendAt: queuedMessage.sendAt,
+    threadRuntimeDisplayStatus,
     threadStatus,
     waitingOn: queuedMessage.waitingOn,
   });
   if (label === null) return null;
   const failed = queuedMessage.failureReason !== null;
-  const icon = queuedMessageWaitIcon(queuedMessage);
+  const icon = queuedMessageWaitIcon({
+    ...queuedMessage,
+    threadRuntimeDisplayStatus,
+  });
   const countdownInstant = queuedMessageCountdownInstant(queuedMessage);
   const countdown =
     countdownInstant === null
@@ -708,7 +716,15 @@ function QueuedMessageWaitLine({
       )}
     >
       {icon !== null ? (
-        <Icon name={icon} className="size-3 shrink-0" aria-hidden />
+        <Icon
+          name={icon}
+          className={cn(
+            "size-3 shrink-0",
+            icon === "Zap" &&
+              "animate-shine-icon text-yellow-600 dark:text-yellow-400",
+          )}
+          aria-hidden
+        />
       ) : queuedMessage.waitingOn?.kind === "plugin" ? (
         <PluginIcon
           pluginId={queuedMessage.waitingOn.pluginId}
@@ -727,9 +743,11 @@ function QueuedMessageWaitLine({
 
 function QueuedMessagesHeaderWait({
   queuedMessages,
+  threadRuntimeDisplayStatus,
   threadStatus,
 }: {
   queuedMessages: readonly ThreadQueuedMessage[];
+  threadRuntimeDisplayStatus?: ThreadRuntimeDisplayStatus;
   threadStatus: ThreadStatus;
 }) {
   const newestFirst = [...queuedMessages].sort(
@@ -753,6 +771,7 @@ function QueuedMessagesHeaderWait({
     <QueuedMessageWaitLine
       pluginDisplayName={pluginDisplayName}
       queuedMessage={attentionMessage}
+      threadRuntimeDisplayStatus={threadRuntimeDisplayStatus}
       threadStatus={threadStatus}
     />
   );
@@ -822,6 +841,7 @@ const QueuedMessageRow = memo(function QueuedMessageRow({
   onDelete,
   compact,
   isGroupBoundary,
+  threadRuntimeDisplayStatus,
   threadStatus,
 }: QueuedMessageRowProps) {
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -984,6 +1004,7 @@ const QueuedMessageRow = memo(function QueuedMessageRow({
                 <QueuedMessageWaitLine
                   pluginDisplayName={pluginDisplayName}
                   queuedMessage={queuedMessage}
+                  threadRuntimeDisplayStatus={threadRuntimeDisplayStatus}
                   threadStatus={threadStatus}
                 />
               ) : null}
@@ -1281,6 +1302,7 @@ export function QueuedMessagesList({
   onDelete,
   expanded,
   onExpandedChange,
+  threadRuntimeDisplayStatus,
   threadStatus,
 }: QueuedMessagesListProps) {
   const senderThreadMetadataById = useSenderThreadMetadataById();
@@ -1690,6 +1712,7 @@ export function QueuedMessagesList({
           onExpandMobileActions={setExpandedMobileActionsId}
           compact={mode !== "workspace"}
           isGroupBoundary={messageIndex === groupBoundaryIndex}
+          threadRuntimeDisplayStatus={threadRuntimeDisplayStatus}
           threadStatus={threadStatus}
           onSend={onSend}
           onEdit={handleEdit}
@@ -1750,6 +1773,7 @@ export function QueuedMessagesList({
           {isExpanded ? null : (
             <QueuedMessagesHeaderWait
               queuedMessages={queuedMessages}
+              threadRuntimeDisplayStatus={threadRuntimeDisplayStatus}
               threadStatus={threadStatus}
             />
           )}

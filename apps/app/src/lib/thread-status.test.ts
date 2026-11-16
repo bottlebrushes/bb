@@ -66,7 +66,7 @@ const CASES: StatusCase[] = [
       isWorking: true,
     }),
   ),
-  ...(["error", "idle", "pending", "waiting-for-host"] as const).map(
+  ...(["error", "idle", "pending"] as const).map(
     (runtime): StatusCase => ({
       name: `a ${runtime} runtime`,
       thread: { runtime },
@@ -74,6 +74,12 @@ const CASES: StatusCase[] = [
       isWorking: false,
     }),
   ),
+  {
+    name: "a waiting-for-host runtime",
+    thread: { runtime: "waiting-for-host" },
+    indicator: "waiting-for-host",
+    isWorking: false,
+  },
   ...(
     [
       ["workflows", "workflow"],

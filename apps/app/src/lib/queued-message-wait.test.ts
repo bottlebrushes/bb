@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { QueuedMessageWaitingOn, ThreadStatus } from "@bb/domain";
+import type {
+  QueuedMessageWaitingOn,
+  ThreadRuntimeDisplayStatus,
+  ThreadStatus,
+} from "@bb/domain";
 import {
   describeQueuedMessageWait,
   formatQueuedMessageCountdown,
@@ -28,6 +32,7 @@ function describeWait(
     now?: number;
     pluginDisplayName?: string | null;
     sendAt?: number | null;
+    threadRuntimeDisplayStatus?: ThreadRuntimeDisplayStatus;
     threadStatus?: ThreadStatus;
   } = {},
 ): string | null {
@@ -37,6 +42,7 @@ function describeWait(
     payload: { kind: "inline" },
     pluginDisplayName: overrides.pluginDisplayName ?? null,
     sendAt: overrides.sendAt ?? null,
+    threadRuntimeDisplayStatus: overrides.threadRuntimeDisplayStatus,
     threadStatus: overrides.threadStatus ?? "active",
     waitingOn,
   });
@@ -62,6 +68,14 @@ describe("describeQueuedMessageWait", () => {
       "Waiting for your reply",
     );
   });
+  it("names a queued turn waiting for the disconnected host", () => {
+    expect(
+      describeWait(
+        { kind: "turn-starting" },
+        { threadRuntimeDisplayStatus: "waiting-for-host" },
+      ),
+    ).toBe("Waiting for machine to resume");
+  });
 
   it("stops promising a turn start once the thread's run has failed", () => {
     expect(
@@ -69,9 +83,9 @@ describe("describeQueuedMessageWait", () => {
     ).toBe("Turn didn't start · sends on the next turn");
   });
 
-  it("names the absent machine a host-offline row is waiting on", () => {
+  it("names the machine a host-offline row is waiting on", () => {
     expect(describeWait({ kind: "host-offline", hostName: "M4" })).toBe(
-      "Waiting for M4 to be ready",
+      "Waiting for machine to reconnect",
     );
   });
 
@@ -168,9 +182,16 @@ describe("queuedMessageWaitIcon", () => {
 
     expect(icon({ kind: "time" })).toBe("TimeSchedule");
     expect(icon({ kind: "turn-starting" })).toBe("TimeSchedule");
+    expect(
+      queuedMessageWaitIcon({
+        failureReason: null,
+        payload: { kind: "inline" },
+        threadRuntimeDisplayStatus: "waiting-for-host",
+        waitingOn: { kind: "turn-starting" },
+      }),
+    ).toBe("Zap");
     expect(icon({ kind: "provisioning" })).toBe("Folder");
-    expect(icon({ kind: "host-offline", hostName: "M4" })).toBe("CloudOff");
-    expect(icon({ kind: "interaction" })).toBe("CircleQuestion");
+    expect(icon({ kind: "host-offline", hostName: "M4" })).toBe("Zap");
     expect(icon({ kind: "plugin", pluginId: "p", reason: "r" })).toBeNull();
     expect(icon({ kind: "thread-busy" })).toBeNull();
     expect(icon(null)).toBeNull();

@@ -531,8 +531,9 @@ export function ThreadScreen({
         showOngoingIndicator={
           thread.status !== "stopping" &&
           !hasPendingInteraction &&
-          isRunningThreadRuntimeDisplayStatus(thread.runtime.displayStatus) &&
-          !isThreadTimelinePending
+          !isThreadTimelinePending &&
+          (isRunningThreadRuntimeDisplayStatus(thread.runtime.displayStatus) ||
+            thread.runtime.displayStatus === "waiting-for-host")
         }
         timelineRows={timelineRows}
         timelineNavigationTargetRowId={timelineNavigationTargetRowId}
